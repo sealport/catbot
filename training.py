@@ -9,9 +9,12 @@ from cat_env import make_env
 # TODO: YOU MAY ADD ADDITIONAL IMPORTS OR FUNCTIONS HERE.                   #
 #############################################################################
 
-
-
-
+# Checks if nextState has matching 1st and 3rd, 2nd and 4th digits
+def isGoal(nextState):
+    if(nextState // 1000 == nextState % 100 // 10 and nextState // 100 % 10 == nextState % 100):
+        return True
+    else:
+        return False
 
 
 
@@ -43,7 +46,7 @@ def train_bot(cat_name, render: int = -1):
     alpha = 0.5
     gamma = 0.9
     epsilon = 1.0
-    epsilon_decay = 0.001
+    epsilon_decay = 0.00015
 
     # Retrieved from: https://medium.com/data-science/q-learning-for-beginners-2837b777741
     # Used for plotting / visuals if model is improving
@@ -66,12 +69,12 @@ def train_bot(cat_name, render: int = -1):
         # 4. Since this environment doesn't give rewards, compute reward manually    #
         # 5. Update the Q-table accordingly based on agent's rewards.                #
         ############################################################################## 
-         
+
+		# Referenced from: https://medium.com/data-science/q-learning-for-beginners-2837b777741
+		# Referenced from: https://gymnasium.farama.org/introduction/train_agent/
         # 1. Reset the environment to start a new episode. #      
         state, info = env.reset()
         done = False
-        
-        #print("Current state: \t\t\t" + str(state)) ######## For debugging only
 
         for move in range(60):
             # Generate a random number between 0 and 1
@@ -85,26 +88,26 @@ def train_bot(cat_name, render: int = -1):
             else:
                 action = np.argmax(q_table[state]) 
 
-            #print("Chosen action: " + str(action)) ###### For debugging only
-
         # 3. Take the action and observe the next state. #
-	    # Implement this action and move the agent in the desired direction
             next_state, reward, done, truncated, info = env.step(action)
-  
-            #print("Next STATE STATE STATE: " + str(next_state)) ###### For debugging only
+
+            if isGoal(next_state):
+                reward = 1
+            else:
+                reward = 0
 
 	    # Update Q(state, action)
             q_table[state][action] = q_table[state][action] + \
-                                alpha * (reward + gamma * np.max(q_table[state]) - q_table[state][action])
+                                alpha * (reward + gamma * np.max(q_table[next_state]) - q_table[state][action])
 
 	    # Update current state 
             state = next_state
-            #print("NEW STATE STATE STATE AHHHHH: " + str(state)) ###### For debugging only
 
             # Used for plotting / visuals if model is improving
-            if reward:
-                outcomes[-1] = "Success"
+            # if reward:
+                # outcomes[-1] = "Success"
 
+			# End current episode if marked found?
             if done:
                 break
                 
