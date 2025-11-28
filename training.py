@@ -11,7 +11,7 @@ from cat_env import make_env
 
 # Checks if nextState has matching 1st and 3rd, 2nd and 4th digits
 def isGoal(nextState):
-    if(nextState // 1000 == nextState % 100 // 10 and nextState // 100 % 10 == nextState % 100):
+    if(nextState // 1000 == nextState % 100 // 10 and nextState // 100 % 10 == nextState % 10):
         return True
     else:
         return False
@@ -43,14 +43,13 @@ def train_bot(cat_name, render: int = -1):
     #############################################################################
     
     # Hyperparameters (temporary for now)
-    alpha = 0.5
-    gamma = 0.9
-    epsilon = 1.0
-    epsilon_decay = 0.00015
+    alpha = 0.4
+    gamma = 0.62
+    epsilon = 0.95
+    epsilon_decay = 0.0019
 
-    # Retrieved from: https://medium.com/data-science/q-learning-for-beginners-2837b777741
-    # Used for plotting / visuals if model is improving
-    outcomes = []
+    # Used to count how many times a cat has been caught
+    wins = 0
 
 
 
@@ -93,8 +92,12 @@ def train_bot(cat_name, render: int = -1):
 
             if isGoal(next_state):
                 reward = 1
+                #################################################################################
+                # Increment the win counter (Comment this out when submitting)
+                wins = wins + 1 
+                #################################################################################
             else:
-                reward = 0
+                reward = -0.00025
 
 	    # Update Q(state, action)
             q_table[state][action] = q_table[state][action] + \
@@ -103,10 +106,6 @@ def train_bot(cat_name, render: int = -1):
 	    # Update current state 
             state = next_state
 
-            # Used for plotting / visuals if model is improving
-            # if reward:
-                # outcomes[-1] = "Success"
-
 			# End current episode if marked found?
             if done:
                 break
@@ -114,9 +113,10 @@ def train_bot(cat_name, render: int = -1):
         # Update chances of exploring/exploiting
         epsilon = max(epsilon - epsilon_decay, 0)
 
-
-
-
+        ###########################################################################################
+        # Used for evaluating the current model
+        print("Wins: " + str(wins) + "/5000 || Remaining: " + str(5000 - ep))
+        ###########################################################################################
 
 
 
